@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor</title>
+</head>
+
+<body class="editor__body">
+    <div class="editor__code-section">
+        <div class="editor__control">
+            <button id="clear__html" class="editor__control-btn">Очистити html</button>
+            <button id="clear__css" class="editor__control-btn">Очистити css</button>
+            <button id="clear__all" class="editor__control-btn">Очистити все</button>
+            <a id="save__html" download="index.html">Зберегти html</a>
+            <a id="save__css" download="style.css">Зберегти css</a>
+        </div>
+        <textarea class="editor__textarea" id="html" cols="80" rows="30" placeholder="html"></textarea>
+        <textarea class="editor__textarea" id="css" cols="80" rows="20" placeholder="css"></textarea>
+    </div>
+    <div class="editor__view" id="view"></div>
+</body>
+
+<style id="user-styles"></style>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+    }
+
+    .editor__body {
+        max-height: 100vh;
+        padding: 5px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .editor__code-section {
+        /* 80 characters */
+        width: 616px;
+    }
+
+    .editor__control {
+        padding-bottom: 5px;
+    }
+
+    .editor__control-btn:hover {
+        cursor: pointer;
+    }
+
+    .editor__textarea {
+        padding: 5px;
+        resize: vertical;
+    }
+
+    .editor__view {
+        width: 100%;
+        min-height: calc(100vh - 5px);
+    }
+
+    @media screen and (min-width: 860px) {
+        .editor__body {
+            flex-wrap: nowrap;
+        }
+    }
+</style>
+
+<script>
+    const htmlElement = document.getElementById("html")
+    const cssElement = document.getElementById("css")
+    const styleElement = document.getElementById("user-styles")
+    const viewElement = document.getElementById("view")
+    const btnClearHtml = document.getElementById("clear__html")
+    const btnClearCss = document.getElementById("clear__css")
+    const btnClearAll = document.getElementById("clear__all")
+    const linkDownloadHtml = document.getElementById("save__html")
+    const linkDownloadCss = document.getElementById("save__css")
+    const storeKeys = {
+        html: 'html',
+        css: 'css',
+    }
+
+    htmlElement.addEventListener("input", (ev) => eventHandler(storeKeys.html, ev.target.value, viewElement, linkDownloadHtml))
+    cssElement.addEventListener("input", (ev) => eventHandler(storeKeys.css, ev.target.value, styleElement, linkDownloadCss))
+    btnClearHtml.addEventListener("click", () => clear(storeKeys.html, htmlElement, linkDownloadHtml))
+    btnClearCss.addEventListener("click", () => clear(storeKeys.css, cssElement, linkDownloadCss))
+    btnClearAll.addEventListener("click", () => clearAll())
+
+    start()
+
+    function storePut(key, value) {
+        localStorage.setItem(key, value)
+    }
+
+    function storeGet(key) {
+        return localStorage.getItem(key)
+    }
+
+    function toRender(text, target) {
+        return target.innerHTML = text
+    }
+
+    function putInTextArea(text, target) {
+        return target.textContent = text
+    }
+
+    function start() {
+        const html = storeGet(storeKeys.html)
+        const css = storeGet(storeKeys.css)
+        html && html != 'undefined' && putInTextArea(html, htmlElement) && toRender(html, viewElement) && updateHref(html, linkDownloadHtml)
+        css && css != 'undefined' && putInTextArea(css, cssElement) && toRender(css, styleElement) && updateHref(css, linkDownloadCss)
+    }
+
+    function updateHref(text, linkElement) {
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" })
+        linkElement.href = URL.createObjectURL(blob)
+    }
+
+    function eventHandler(key, text, target, linkElement) {
+        storePut(key, text)
+        toRender(text, target)
+        updateHref(text, linkElement)
+    }
+
+    function clear(key, target, elementLink) {
+        toRender("", viewElement)
+        storePut(key, undefined)
+        target.value = ""
+        elementLink.removeAttribute("href")
+    }
+
+    function clearAll() {
+        clear(storeKeys.html, htmlElement, linkDownloadHtml)
+        clear(storeKeys.css, cssElement, linkDownloadCss)
+    }
+</script>
+
+</html>
