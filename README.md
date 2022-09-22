@@ -5,3 +5,4 @@ Simple code editor for HTML and CSS
 - Save in localStorage
 - Save code as file
 - Clear code section
+- Save as vue.js component
